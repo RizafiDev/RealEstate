@@ -12,20 +12,26 @@ return new class extends Migration {
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name', 50)->unique();  // Added username field
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('full_name', 100);  // Added full_name field
+            $table->string('phone', 20)->nullable();  // Added phone field
+            $table->string('avatar')->nullable();  // Added avatar field
+            $table->boolean('is_active')->default(true);  // Added is_active field
             $table->rememberToken();
             $table->timestamps();
         });
 
+        // Password reset tokens (keep Laravel default)
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
+        // Sessions (keep Laravel default)
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
