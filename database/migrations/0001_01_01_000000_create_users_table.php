@@ -16,7 +16,6 @@ return new class extends Migration {
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('full_name', 100);  // Added full_name field
             $table->string('phone', 20)->nullable();  // Added phone field
             $table->string('avatar')->nullable();  // Added avatar field
             $table->boolean('is_active')->default(true);  // Added is_active field
