@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->timestamp('scheduled_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('created_at')->useCurrent();
-
+            $table->timestamp('deleted_at')->nullable(); // Soft delete
             $table->foreign('lead_id')->references('id')->on('leads');
             $table->foreign('user_id')->references('id')->on('users');
         });

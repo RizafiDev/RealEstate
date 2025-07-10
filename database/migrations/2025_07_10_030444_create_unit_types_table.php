@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->integer('floors')->default(1);
             $table->json('specifications')->nullable();
             $table->string('floor_plan', 255)->nullable();
+            $table->timestamp('deleted_at')->nullable(); // Soft delete
             $table->timestamps();
 
             $table->foreign('project_id')->references('id')->on('projects');

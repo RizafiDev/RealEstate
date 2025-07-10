@@ -19,8 +19,10 @@ return new class extends Migration {
             $table->string('phone', 20)->nullable();
             $table->string('email', 100)->nullable();
             $table->string('website', 255)->nullable();
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->integer('established_year')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

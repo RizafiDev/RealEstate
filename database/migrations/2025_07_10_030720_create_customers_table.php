@@ -24,6 +24,7 @@ return new class extends Migration {
             $table->enum('marital_status', ['single', 'married', 'divorced', 'widowed'])->nullable();
             $table->enum('source', ['website', 'referral', 'advertisement', 'walk_in', 'social_media'])->default('website');
             $table->text('notes')->nullable();
+            $table->timestamp('deleted_at')->nullable(); // Soft delete
             $table->timestamps();
 
             $table->index('phone');

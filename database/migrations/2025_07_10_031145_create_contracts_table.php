@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->text('terms_conditions')->nullable();
+            $table->timestamp('deleted_at')->nullable(); // Soft delete
             $table->timestamps();
 
             $table->foreign('booking_id')->references('id')->on('bookings');

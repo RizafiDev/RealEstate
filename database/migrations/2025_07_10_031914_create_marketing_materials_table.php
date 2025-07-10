@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('project_id')->nullable();
             $table->text('description')->nullable();
             $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('deleted_at')->nullable(); // Soft delete
 
             $table->foreign('project_id')->references('id')->on('projects');
         });

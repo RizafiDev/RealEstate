@@ -14,22 +14,25 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('project_id');
             $table->unsignedBigInteger('unit_type_id');
-            $table->string('block', 10);
-            $table->string('number', 10);
-            $table->enum('status', ['available', 'booked', 'sold', 'reserved'])->default('available');
-            $table->decimal('base_price', 15, 2);
-            $table->decimal('selling_price', 15, 2);
-            $table->decimal('booking_fee', 15, 2);
-            $table->enum('facing', ['north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest'])->nullable();
+            $table->string('unit_code')->unique();
+            $table->enum('status', ['available', 'booked', 'sold'])->default('available');
+            $table->decimal('price', 15, 2);
+            $table->decimal('discount_price', 15, 2)->nullable();
+            $table->string('facing')->nullable();
+            $table->string('certificate')->nullable();
+            $table->decimal('cash_hard_percentage', 5, 2)->nullable();
+            $table->decimal('cash_tempo_percentage', 5, 2)->nullable();
+            $table->text('description')->nullable();
             $table->text('notes')->nullable();
+            $table->json('images')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
-            $table->unique(['project_id', 'block', 'number']);
-            $table->foreign('project_id')->references('id')->on('projects');
-            $table->foreign('unit_type_id')->references('id')->on('unit_types');
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+            $table->foreign('unit_type_id')->references('id')->on('unit_types')->onDelete('cascade');
 
             $table->index(['project_id', 'status']);
-            $table->fullText(['block', 'number']);
+            $table->index('unit_code');
         });
     }
 

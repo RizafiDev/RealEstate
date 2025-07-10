@@ -12,14 +12,17 @@ return new class extends Migration {
     {
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 100);
-            $table->enum('type', ['province', 'city', 'district', 'village']);
-            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->string('name');
+            $table->enum('type', ['city', 'district', 'subdistrict']);
+            $table->string('city');
+            $table->string('province');
+            $table->text('address')->nullable();
+            $table->string('postal_code', 10)->nullable();
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();
-            $table->timestamp('created_at')->useCurrent();
-
-            $table->foreign('parent_id')->references('id')->on('locations');
+            $table->text('description')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

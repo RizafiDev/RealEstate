@@ -25,6 +25,7 @@ return new class extends Migration {
             $table->enum('payment_method', ['cash', 'kpr', 'installment']);
             $table->text('notes')->nullable();
             $table->timestamp('expired_at')->nullable();
+            $table->timestamp('deleted_at')->nullable(); // Soft delete
             $table->timestamps();
 
             $table->foreign('customer_id')->references('id')->on('customers');

@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->enum('image_type', ['photo', 'floor_plan', 'master_plan', 'facility']);
             $table->integer('sort_order')->default(0);
             $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('deleted_at')->nullable(); // Soft delete
 
             $table->foreign('project_id')->references('id')->on('projects');
         });

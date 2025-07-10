@@ -24,6 +24,7 @@ return new class extends Migration {
             $table->integer('max_usage')->nullable();
             $table->integer('current_usage')->default(0);
             $table->boolean('is_active')->default(true);
+            $table->timestamp('deleted_at')->nullable(); // Soft delete
             $table->timestamps();
 
             $table->foreign('project_id')->references('id')->on('projects');

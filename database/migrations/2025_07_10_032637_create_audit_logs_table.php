@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->ipAddress('ip_address')->nullable();
             $table->string('user_agent')->nullable();
             $table->string('tags')->nullable();
+            $table->timestamp('deleted_at')->nullable(); // Soft delete
             $table->timestamps();
 
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();

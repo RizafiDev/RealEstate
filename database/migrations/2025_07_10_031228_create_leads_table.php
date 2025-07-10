@@ -25,6 +25,7 @@ return new class extends Migration {
             $table->timestamp('last_contact_date')->nullable();
             $table->timestamp('next_follow_up')->nullable();
             $table->timestamp('conversion_date')->nullable();
+            $table->timestamp('deleted_at')->nullable(); // Soft delete
             $table->timestamps();
 
             $table->foreign('customer_id')->references('id')->on('customers');
