@@ -106,4 +106,9 @@ class Project extends Model
 
         return ($this->sold_units / $totalUnits) * 100;
     }
+
+    public function getUnitsCountAttribute()
+    {
+        return $this->units()->count();
+    }
 }

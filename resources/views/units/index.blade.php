@@ -128,14 +128,13 @@
         @forelse($units as $unit)
             <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
                 <div class="relative">
-                    @if($unit->images && count($unit->images) > 0)
-                        <img class="h-48 w-full object-cover" src="{{ asset('storage/' . $unit->images[0]) }}" alt="{{ $unit->unit_code }}">
-                    @else
-                        <div class="h-48 w-full bg-gray-200 flex items-center justify-center">
-                            <i class="fas fa-home text-gray-400 text-4xl"></i>
-                        </div>
-                    @endif
-                    
+@if($unit->images && is_array($unit->images) && count($unit->images) > 0)
+    <img class="h-48 w-full object-cover" src="{{ asset('storage/' . $unit->images[0]) }}" alt="{{ $unit->unit_code }}">
+@else
+    <div class="h-48 w-full bg-gray-200 flex items-center justify-center">
+        <i class="fas fa-home text-gray-400 text-4xl"></i>
+    </div>
+@endif
                     <!-- Status Badge -->
                     <div class="absolute top-2 right-2">
                         @if($unit->status == 'available')

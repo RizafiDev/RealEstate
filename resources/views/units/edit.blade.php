@@ -157,7 +157,7 @@
             </div>
 
             <!-- Current Images -->
-            @if($unit->images && count($unit->images) > 0)
+            @if($unit->images && is_array($unit->images) && count($unit->images) > 0)
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Current Images</label>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -25,7 +25,7 @@
     <!-- Project Header -->
     <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
         <div class="relative h-64 bg-gradient-to-r from-indigo-600 to-purple-600">
-            @if($project->images && count($project->images) > 0)
+            @if($project->images && is_array($project->images) && count($project->images) > 0)
                 <img src="{{ asset('storage/' . $project->images[0]) }}" alt="{{ $project->name }}" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-black opacity-40"></div>
             @endif
@@ -134,7 +134,7 @@
                 @foreach($units as $unit)
                     <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
                         <div class="relative">
-                            @if($unit->images && count($unit->images) > 0)
+                            @if($unit->images && is_array($unit->images) && count($unit->images) > 0)
                                 <img class="h-48 w-full object-cover" src="{{ asset('storage/' . $unit->images[0]) }}" alt="{{ $unit->unit_code }}">
                             @else
                                 <div class="h-48 w-full bg-gray-200 flex items-center justify-center">

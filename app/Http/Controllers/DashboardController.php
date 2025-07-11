@@ -2,191 +2,220 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Unit;
 use App\Models\Project;
+use App\Models\Unit;
 use App\Models\Booking;
-use App\Models\Lead;
 use App\Models\Customer;
-use App\Models\User;
+use App\Models\Lead;
+use App\Models\Contract;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Quick Statistics
-        $stats = [
-            'total_units' => Unit::count(),
-            'available_units' => Unit::where('status', 'available')->count(),
-            'booked_units' => Unit::where('status', 'booked')->count(),
-            'sold_units' => Unit::where('status', 'sold')->count(),
-            'total_projects' => Project::count(),
-            'active_projects' => Project::where('status', 'active')->count(),
-            'total_bookings' => Booking::count(),
-            'pending_bookings' => Booking::where('status', 'pending')->count(),
-            'total_leads' => Lead::count(),
-            'new_leads' => Lead::where('status', 'new')->count(),
-            'total_customers' => Customer::count(),
-            'total_revenue' => Booking::whereIn('status', ['confirmed', 'dp_paid', 'completed'])->sum('total_price'),
-        ];
+        // Get dashboard statistics
+        $stats = $this->getDashboardStats();
 
-        // Monthly Sales Chart (Last 6 months)
-        $monthlySales = Booking::select(
-            DB::raw('YEAR(created_at) as year'),
-            DB::raw('MONTH(created_at) as month'),
-            DB::raw('COUNT(*) as total_bookings'),
-            DB::raw('SUM(total_price) as total_revenue')
-        )
-            ->where('created_at', '>=', now()->subMonths(6))
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'asc')
-            ->orderBy('month', 'asc')
-            ->get();
+        // Get top performing projects
+        $topProjects = $this->getTopPerformingProjects();
 
-        // Recent Activities
-        $recentBookings = Booking::with(['unit.project', 'customer'])
-            ->latest()
-            ->limit(5)
-            ->get();
+        // Get recent activities
+        $recentActivities = $this->getRecentActivities();
 
-        $recentLeads = Lead::with(['project'])
-            ->latest()
-            ->limit(5)
-            ->get();
+        // Get recent bookings
+        $recentBookings = $this->getRecentBookings();
 
-        // Top Projects by Sales
-        $topProjects = Project::withCount([
-            'units as sold_units' => function ($query) {
-                $query->where('status', 'sold');
-            }
-        ])
-            ->having('sold_units', '>', 0)
-            ->orderBy('sold_units', 'desc')
-            ->limit(5)
-            ->get();
-
-        // Recent Activities
-        $recentActivities = collect();
-        
-        // Add recent bookings to activities
-        foreach ($recentBookings->take(3) as $booking) {
-            $recentActivities->push([
-                'type' => 'booking',
-                'title' => 'New Booking',
-                'description' => ($booking->customer->name ?? 'Unknown customer') . ' booked ' . ($booking->unit->unit_code ?? 'a unit'),
-                'time' => $booking->created_at->diffForHumans(),
-                'icon' => 'calendar-plus'
-            ]);
-        }
-        
-        // Add recent leads to activities
-        foreach ($recentLeads->take(2) as $lead) {
-            $recentActivities->push([
-                'type' => 'lead',
-                'title' => 'New Lead',
-                'description' => $lead->name . ' showed interest in ' . ($lead->project->name ?? 'a project'),
-                'time' => $lead->created_at->diffForHumans(),
-                'icon' => 'user-plus'
-            ]);
-        }
-        
-        // Sort by time and take latest 5
-        $recentActivities = $recentActivities->sortByDesc(function($item) {
-            return $item['time'];
-        })->take(5);
-
-        // Lead Sources
-        $leadSources = Lead::select('source', DB::raw('count(*) as total'))
-            ->groupBy('source')
-            ->get();
-
-        // Today's Schedule - Add this missing variable
-        $todaySchedule = collect();
-        
-        // Add today's appointments/meetings (if you have an appointments table)
-        // If you don't have appointments, create some sample schedule items from bookings and leads
-        
-        // Today's new bookings
-        $todayBookings = Booking::with(['customer', 'unit'])
-            ->whereDate('created_at', Carbon::today())
-            ->get();
-            
-        foreach ($todayBookings as $booking) {
-            $todaySchedule->push([
-                'time' => $booking->created_at->format('H:i'),
-                'type' => 'booking',
-                'title' => 'New Booking',
-                'description' => 'Booking from ' . ($booking->customer->name ?? 'Unknown'),
-                'status' => 'completed'
-            ]);
-        }
-        
-        // Today's new leads
-        $todayLeads = Lead::whereDate('created_at', Carbon::today())->get();
-        
-        foreach ($todayLeads as $lead) {
-            $todaySchedule->push([
-                'time' => $lead->created_at->format('H:i'),
-                'type' => 'lead',
-                'title' => 'New Lead',
-                'description' => 'Lead from ' . $lead->name,
-                'status' => 'pending'
-            ]);
-        }
-        
-        // Follow-up calls for leads that need attention
-        $followUpLeads = Lead::where('status', 'contacted')
-            ->where('updated_at', '<=', Carbon::now()->subDays(3))
-            ->limit(3)
-            ->get();
-            
-        foreach ($followUpLeads as $lead) {
-            $todaySchedule->push([
-                'time' => '14:00', // Default follow-up time
-                'type' => 'follow-up',
-                'title' => 'Follow-up Call',
-                'description' => 'Follow up with ' . $lead->name,
-                'status' => 'pending'
-            ]);
-        }
-        
-        // Sort schedule by time
-        $todaySchedule = $todaySchedule->sortBy('time')->values();
-
-        // Upcoming Tasks (optional - you can create a tasks table later)
-        $upcomingTasks = collect([
-            [
-                'title' => 'Review pending bookings',
-                'due_date' => Carbon::now()->addHours(2),
-                'priority' => 'high',
-                'type' => 'review'
-            ],
-            [
-                'title' => 'Call new leads',
-                'due_date' => Carbon::now()->addHours(4),
-                'priority' => 'medium',
-                'type' => 'call'
-            ],
-            [
-                'title' => 'Update project status',
-                'due_date' => Carbon::now()->addDay(),
-                'priority' => 'low',
-                'type' => 'update'
-            ]
-        ]);
+        // Get today's schedule
+        $todaySchedule = $this->getTodaySchedule();
 
         return view('dashboard', compact(
             'stats',
-            'monthlySales',
-            'recentBookings',
-            'recentLeads',
             'topProjects',
-            'leadSources',
             'recentActivities',
-            'todaySchedule',
-            'upcomingTasks'
+            'recentBookings',
+            'todaySchedule'
         ));
+    }
+
+    private function getDashboardStats()
+    {
+        $currentMonth = Carbon::now()->startOfMonth();
+        $lastMonth = Carbon::now()->subMonth()->startOfMonth();
+
+        // Calculate total revenue from sold units
+        $totalRevenue = Unit::where('status', 'sold')->sum('price');
+        $lastMonthRevenue = Unit::where('status', 'sold')
+            ->whereBetween('updated_at', [$lastMonth, $currentMonth])
+            ->sum('price');
+
+        $revenueGrowth = $lastMonthRevenue > 0 ?
+            round((($totalRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1) : 0;
+
+        // Projects statistics
+        $activeProjects = Project::whereIn('status', ['development', 'ready'])->count();
+        $newProjectsThisMonth = Project::where('created_at', '>=', $currentMonth)->count();
+
+        // Units statistics
+        $unitsSold = Unit::where('status', 'sold')->count();
+        $availableUnits = Unit::where('status', 'available')->count();
+
+        // Leads statistics
+        $newLeads = Lead::where('created_at', '>=', $currentMonth)->count();
+        $leadsToday = Lead::whereDate('created_at', Carbon::today())->count();
+
+        // Lead funnel statistics
+        $totalLeads = Lead::count();
+        $contactedLeads = Lead::whereNotNull('last_contact_date')->count();
+        $qualifiedLeads = Lead::where('status', 'qualified')->count();
+        $convertedLeads = Lead::where('status', 'converted')->count();
+
+        return [
+            'total_revenue' => $totalRevenue,
+            'revenue_growth' => $revenueGrowth,
+            'projects' => $activeProjects,
+            'new_projects' => $newProjectsThisMonth,
+            'units_sold' => $unitsSold,
+            'available_units' => $availableUnits,
+            'new_leads' => $newLeads,
+            'leads_today' => $leadsToday,
+            'funnel' => [
+                'new_leads' => $totalLeads,
+                'contacted' => $contactedLeads,
+                'contacted_percentage' => $totalLeads > 0 ? round(($contactedLeads / $totalLeads) * 100) : 0,
+                'qualified' => $qualifiedLeads,
+                'qualified_percentage' => $totalLeads > 0 ? round(($qualifiedLeads / $totalLeads) * 100) : 0,
+                'converted' => $convertedLeads,
+                'converted_percentage' => $totalLeads > 0 ? round(($convertedLeads / $totalLeads) * 100) : 0,
+            ]
+        ];
+    }
+
+    private function getTopPerformingProjects()
+    {
+        return Project::with(['location'])
+            ->withCount([
+                'units as units_sold' => function ($query) {
+                    $query->where('status', 'sold');
+                }
+            ])
+            ->orderBy('units_sold', 'desc')
+            ->limit(5)
+            ->get();
+    }
+
+    private function getRecentActivities()
+    {
+        $activities = collect();
+
+        // Recent bookings
+        $recentBookings = Booking::with(['customer', 'unit.project'])
+            ->latest()
+            ->limit(3)
+            ->get();
+
+        foreach ($recentBookings as $booking) {
+            $activities->push([
+                'type' => 'booking',
+                'icon' => 'bookmark',
+                'title' => 'New Booking',
+                'description' => ($booking->customer->name ?? 'Unknown Customer') . ' booked ' . ($booking->unit->unit_code ?? 'Unit'),
+                'time' => $booking->created_at->diffForHumans(),
+                'created_at' => $booking->created_at
+            ]);
+        }
+
+        // Recent leads
+        $recentLeads = Lead::latest()
+            ->limit(3)
+            ->get();
+
+        foreach ($recentLeads as $lead) {
+            $activities->push([
+                'type' => 'lead',
+                'icon' => 'user-plus',
+                'title' => 'New Lead',
+                'description' => ($lead->name ?? 'Unknown') . ' submitted an inquiry',
+                'time' => $lead->created_at->diffForHumans(),
+                'created_at' => $lead->created_at
+            ]);
+        }
+
+        // Recent contracts
+        $recentContracts = Contract::with(['booking.customer'])
+            ->latest()
+            ->limit(2)
+            ->get();
+
+        foreach ($recentContracts as $contract) {
+            $activities->push([
+                'type' => 'contract',
+                'icon' => 'file-contract',
+                'title' => 'Contract Signed',
+                'description' => 'Contract ' . ($contract->contract_number ?? 'Unknown') . ' was signed',
+                'time' => $contract->created_at->diffForHumans(),
+                'created_at' => $contract->created_at
+            ]);
+        }
+
+        return $activities->sortByDesc('created_at')->take(6)->values();
+    }
+
+    private function getRecentBookings()
+    {
+        return Booking::with(['customer', 'unit.project'])
+            ->latest()
+            ->limit(5)
+            ->get();
+    }
+
+    private function getTodaySchedule()
+    {
+        $schedule = collect();
+
+        // Upcoming follow-ups from leads
+        $followUps = Lead::whereDate('next_follow_up', Carbon::today())
+            ->with(['assignedTo'])
+            ->get();
+
+        foreach ($followUps as $followUp) {
+            $schedule->push([
+                'time' => $followUp->next_follow_up ? $followUp->next_follow_up->format('H:i') : '09:00',
+                'type' => 'Follow-up',
+                'title' => 'Follow up with ' . ($followUp->name ?? 'Unknown'),
+            ]);
+        }
+
+        // Bookings expiring today
+        $expiringBookings = Booking::whereDate('expired_at', Carbon::today())
+            ->where('status', 'pending')
+            ->with(['customer'])
+            ->get();
+
+        foreach ($expiringBookings as $booking) {
+            $schedule->push([
+                'time' => '10:00',
+                'type' => 'Reminder',
+                'title' => 'Booking expires: ' . ($booking->customer->name ?? 'Unknown Customer'),
+            ]);
+        }
+
+        // Add some default scheduled items if empty
+        if ($schedule->isEmpty()) {
+            $schedule->push([
+                'time' => '09:00',
+                'type' => 'Meeting',
+                'title' => 'Team standup meeting',
+            ]);
+            $schedule->push([
+                'time' => '14:00',
+                'type' => 'Review',
+                'title' => 'Weekly sales review',
+            ]);
+        }
+
+        return $schedule->sortBy('time')->values();
     }
 }

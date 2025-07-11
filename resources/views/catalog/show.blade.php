@@ -34,7 +34,7 @@
         <!-- Image gallery -->
         <div class="flex flex-col-reverse">
             <!-- Image selector -->
-            @if($unit->images && count($unit->images) > 1)
+            @if($unit->images && is_array($unit->images) && count($unit->images) > 1)
                 <div class="hidden mt-6 w-full max-w-2xl mx-auto sm:block lg:max-w-none">
                     <div class="grid grid-cols-4 gap-6">
                         @foreach($unit->images as $index => $image)
@@ -48,7 +48,7 @@
 
             <!-- Main image -->
             <div class="w-full aspect-w-1 aspect-h-1">
-                @if($unit->images && count($unit->images) > 0)
+                @if($unit->images && is_array($unit->images) && count($unit->images) > 0)
                     <img src="{{ asset('storage/' . $unit->images[0]) }}" alt="{{ $unit->unit_code }}" class="w-full h-full object-center object-cover sm:rounded-lg">
                 @else
                     <div class="w-full h-96 bg-gray-200 flex items-center justify-center rounded-lg">
@@ -177,7 +177,7 @@
                 @foreach($similarUnits as $similarUnit)
                     <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
                         <div class="relative">
-                            @if($similarUnit->images && count($similarUnit->images) > 0)
+                            @if($similarUnit->images && is_array($similarUnit->images) && count($similarUnit->images) > 0)
                                 <img class="h-48 w-full object-cover" src="{{ asset('storage/' . $similarUnit->images[0]) }}" alt="{{ $similarUnit->unit_code }}">
                             @else
                                 <div class="h-48 w-full bg-gray-200 flex items-center justify-center">

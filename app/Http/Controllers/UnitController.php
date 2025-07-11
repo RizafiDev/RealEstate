@@ -62,6 +62,7 @@ class UnitController extends Controller
             'sold_units' => Unit::where('status', 'sold')->count(),
         ];
 
+        $units = $query->paginate(12);
         return view('units.index', compact('units', 'projects', 'unitTypes', 'statistics'));
     }
 

@@ -141,7 +141,7 @@
             <div class="unit-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer" onclick="viewUnit({{ $unit->id }})">
                 <!-- Image -->
                 <div class="relative h-48 bg-gray-200">
-                    @if($unit->images && count($unit->images) > 0)
+                    @if($unit->images && is_array($unit->images) && count($unit->images) > 0)
                         <img class="w-full h-full object-cover" src="{{ asset('storage/' . $unit->images[0]) }}" alt="{{ $unit->unit_code }}">
                     @else
                         <div class="w-full h-full flex items-center justify-center">
@@ -162,7 +162,7 @@
                     </button>
                     
                     <!-- Image Count -->
-                    @if($unit->images && count($unit->images) > 1)
+                    @if($unit->images && is_array($unit->images) && count($unit->images) > 1)
                     <div class="absolute bottom-3 right-3 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
                         <i class="fas fa-camera mr-1"></i> {{ count($unit->images) }}
                     </div>

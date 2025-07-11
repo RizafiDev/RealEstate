@@ -27,7 +27,7 @@
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <div class="p-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Unit Images</h3>
-                    @if($unit->images && count($unit->images) > 0)
+                    @if($unit->images && is_array($unit->images) && count($unit->images) > 0)
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             @foreach($unit->images as $image)
                                 <img src="{{ asset('storage/' . $image) }}" alt="Unit Image" class="w-full h-48 object-cover rounded-lg">

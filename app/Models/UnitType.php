@@ -17,11 +17,10 @@ class UnitType extends Model
         'building_area',
         'bedrooms',
         'bathrooms',
-        'garage',
+        'garages', // Changed from 'garage' to 'garages'
         'floors',
-        'features',
+        'specifications', // Added missing 'specifications'
         'floor_plan',
-        'images'
     ];
 
     protected $casts = [
@@ -29,10 +28,9 @@ class UnitType extends Model
         'building_area' => 'decimal:2',
         'bedrooms' => 'integer',
         'bathrooms' => 'integer',
-        'garage' => 'integer',
+        'garages' => 'integer', // Changed from 'garage' to 'garages'
         'floors' => 'integer',
-        'features' => 'array',
-        'images' => 'array'
+        'specifications' => 'array', // Added specifications casting
     ];
 
     public function project()

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\Project;
 use App\Models\User;
@@ -63,6 +64,7 @@ class LeadController extends Controller
         // For filters
         $projects = Project::all();
         $agents = User::all(); // Add this missing variable
+        $customers = Customer::all(); // Assuming you have a role field
 
         return view('leads.index', compact('leads', 'stats', 'projects', 'agents'));
     }
@@ -77,8 +79,9 @@ class LeadController extends Controller
     {
         $projects = Project::where('status', 'active')->get();
         $users = User::all();
+        $customers = Customer::all();
 
-        return view('leads.create', compact('projects', 'users'));
+        return view('leads.create', compact('projects', 'users', 'customers'));
     }
 
     public function store(Request $request)

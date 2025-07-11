@@ -14,7 +14,7 @@ class BookingController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Booking::with(['unit.project', 'customer', 'salesPerson']);
+        $query = Booking::with(['unit.project', 'customer', 'salesAgent']);
 
         // Search
         if ($request->filled('search')) {
@@ -73,7 +73,7 @@ class BookingController extends Controller
 
     public function show(Booking $booking)
     {
-        $booking->load(['unit.project', 'customer', 'salesPerson']);
+        $booking->load(['unit.project', 'customer', 'salesAgent']);
         return view('bookings.show', compact('booking'));
     }
 
@@ -186,7 +186,7 @@ class BookingController extends Controller
 
     public function contract(Booking $booking)
     {
-        $booking->load(['unit.project', 'customer', 'salesPerson']);
+        $booking->load(['unit.project', 'customer', 'salesAgent']);
 
         return view('bookings.contract', compact('booking'));
     }

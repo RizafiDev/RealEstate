@@ -16,7 +16,7 @@ class CustomerController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
+                $q->where('full_name', 'LIKE', "%{$search}%")
                     ->orWhere('email', 'LIKE', "%{$search}%")
                     ->orWhere('phone', 'LIKE', "%{$search}%")
                     ->orWhere('id_number', 'LIKE', "%{$search}%");
@@ -34,7 +34,7 @@ class CustomerController extends Controller
         }
 
         // Sort
-        $sort = $request->get('sort', 'name');
+        $sort = $request->get('sort', 'full_name');
         $direction = $request->get('direction', 'asc');
         $query->orderBy($sort, $direction);
 
@@ -65,7 +65,7 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'full_name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255|unique:customers',
             'phone' => 'required|string|max:20',
             'id_number' => 'nullable|string|max:50|unique:customers',
@@ -79,8 +79,8 @@ class CustomerController extends Controller
             'occupation' => 'nullable|string|max:255',
             'monthly_income' => 'nullable|numeric|min:0',
             'customer_type' => 'required|in:individual,corporate',
-            'company_name' => 'nullable|string|max:255',
-            'emergency_contact_name' => 'nullable|string|max:255',
+            'company_full_name' => 'nullable|string|max:255',
+            'emergency_contact_full_name' => 'nullable|string|max:255',
             'emergency_contact_phone' => 'nullable|string|max:20',
             'emergency_contact_relation' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
@@ -101,7 +101,7 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'full_name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255|unique:customers,email,' . $customer->id,
             'phone' => 'required|string|max:20',
             'id_number' => 'nullable|string|max:50|unique:customers,id_number,' . $customer->id,
@@ -115,8 +115,8 @@ class CustomerController extends Controller
             'occupation' => 'nullable|string|max:255',
             'monthly_income' => 'nullable|numeric|min:0',
             'customer_type' => 'required|in:individual,corporate',
-            'company_name' => 'nullable|string|max:255',
-            'emergency_contact_name' => 'nullable|string|max:255',
+            'company_full_name' => 'nullable|string|max:255',
+            'emergency_contact_full_name' => 'nullable|string|max:255',
             'emergency_contact_phone' => 'nullable|string|max:20',
             'emergency_contact_relation' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
@@ -149,7 +149,7 @@ class CustomerController extends Controller
 
         $csvData = [];
         $csvData[] = [
-            'Name',
+            'full_name',
             'Email',
             'Phone',
             'ID Number',
@@ -161,14 +161,14 @@ class CustomerController extends Controller
             'Occupation',
             'Monthly Income',
             'Customer Type',
-            'Company Name',
+            'Company full_name',
             'Status',
             'Created At'
         ];
 
         foreach ($customers as $customer) {
             $csvData[] = [
-                $customer->name,
+                $customer->full_name,
                 $customer->email,
                 $customer->phone,
                 $customer->id_number,
@@ -180,17 +180,17 @@ class CustomerController extends Controller
                 $customer->occupation,
                 $customer->monthly_income,
                 $customer->customer_type,
-                $customer->company_name,
+                $customer->company_full_name,
                 $customer->status,
                 $customer->created_at->format('Y-m-d H:i:s'),
             ];
         }
 
-        $filename = 'customers_export_' . date('Y-m-d_H-i-s') . '.csv';
+        $filefull_name = 'customers_export_' . date('Y-m-d_H-i-s') . '.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filefull_name="' . $filefull_name . '"',
         ];
 
         $callback = function () use ($csvData) {

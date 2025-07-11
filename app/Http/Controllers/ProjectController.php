@@ -12,7 +12,7 @@ class ProjectController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Project::with(['developer', 'location']);
+        $query = Project::with(['developer', 'location', 'units']);
 
         // Search
         if ($request->filled('search')) {
@@ -44,21 +44,22 @@ class ProjectController extends Controller
         $direction = $request->get('direction', 'asc');
         $query->orderBy($sort, $direction);
 
-        $projects = $query->paginate(10);
+        $projects = $query->paginate(12);
 
-        // Statistics
-        $stats = [
-            'total' => Project::count(),
-            'active' => Project::where('status', 'active')->count(),
-            'planned' => Project::where('status', 'planned')->count(),
-            'completed' => Project::where('status', 'completed')->count(),
+        // Calculate statistics
+        $statistics = [
+            'total_projects' => Project::count(),
+            'ready_projects' => Project::where('status', 'ready')->count(),
+            'development_projects' => Project::where('status', 'development')->count(),
+            'total_units' => \App\Models\Unit::count(),
+            'completed_projects' => Project::where('status', 'completed')->count(),
+            'planning_projects' => Project::where('status', 'planning')->count(),
         ];
 
-        // For filters
-        $developers = Developer::all();
-        $locations = Location::all();
+        // Get data for filters
+        $developers = \App\Models\Developer::orderBy('name')->get();
 
-        return view('projects.index', compact('projects', 'stats', 'developers', 'locations'));
+        return view('projects.index', compact('projects', 'statistics', 'developers'));
     }
 
     public function show(Project $project)
